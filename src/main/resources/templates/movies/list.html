@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Фильмы</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -8,7 +9,15 @@
 <div class="container mt-5">
     <h1>Фильмы</h1>
 
-    <a href="/movies/add" class="btn btn-primary mb-3">Добавить фильм</a>
+    <div class="mb-3">
+        <a href="/movies/add" class="btn btn-primary"
+           sec:authorize="hasRole('ADMIN')">Добавить фильм</a>
+        <form th:action="@{/auth/logout}"
+              method="post"
+              style="display: inline-block; float: right;">
+            <button type="submit" class="btn btn-danger">Выйти</button>
+        </form>
+    </div>
 
     <table class="table">
         <thead>
@@ -17,10 +26,8 @@
             <th>Год</th>
             <th>Режиссер</th>
             <th>Жанр</th>
-            <th>Длительность</th>
-            <th>Рейтинг IMDB</th>
-            <th>Возрастной рейтинг</th>
-            <th>Действия</th>
+            <th>Рейтинг</th>
+            <th sec:authorize="hasRole('ADMIN')">Действия</th>
         </tr>
         </thead>
         <tbody>
@@ -28,24 +35,27 @@
             <td th:text="${movie.title}"></td>
             <td th:text="${movie.year}"></td>
             <td th:text="${movie.director}"></td>
-            <td th:text="${movie.genreDisplay}"></td>
-            <td th:text="${movie.duration + ' мин.'}"></td>
+            <td th:text="${
+                movie.genre == T(com.cinema.model.Genre).ACTION ? 'Боевик' :
+                movie.genre == T(com.cinema.model.Genre).COMEDY ? 'Комедия' :
+                movie.genre == T(com.cinema.model.Genre).DRAMA ? 'Драма' :
+                movie.genre == T(com.cinema.model.Genre).HORROR ? 'Ужасы' :
+                movie.genre == T(com.cinema.model.Genre).THRILLER ? 'Триллер' :
+                movie.genre == T(com.cinema.model.Genre).SCIFI ? 'Научная фантастика' : ''}">
+            </td>
             <td th:text="${movie.imdbRating != null ? movie.imdbRating + '/10' : 'Нет оценки'}"></td>
-            <td th:text="${movie.ratingDisplay}"></td>
-            <td>
-                <div class="btn-group" role="group">
-                    <a th:href="@{/movies/edit/{id}(id=${movie.id})}"
-                       class="btn btn-warning btn-sm">Изменить</a>
-                    <form th:action="@{/movies/delete/{id}(id=${movie.id})}"
-                          method="post"
-                          style="display: inline;">
-                        <button type="submit"
-                                class="btn btn-danger btn-sm"
-                                onclick="return confirm('Точно удаляем? 🎬')">
-                            Удалить
-                        </button>
-                    </form>
-                </div>
+            <td sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/movies/edit/{id}(id=${movie.id})}"
+                   class="btn btn-warning btn-sm">Изменить</a>
+                <form th:action="@{/movies/delete/{id}(id=${movie.id})}"
+                      method="post"
+                      style="display: inline;">
+                    <button type="submit"
+                            class="btn btn-danger btn-sm"
+                            onclick="return confirm('Уверен?')">
+                        Удалить
+                    </button>
+                </form>
             </td>
         </tr>
         </tbody>
