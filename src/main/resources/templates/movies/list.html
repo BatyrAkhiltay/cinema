@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Фильмы</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Фильмы</h1>
+
+    <a href="/movies/add" class="btn btn-primary mb-3">Добавить фильм</a>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Год</th>
+            <th>Режиссер</th>
+            <th>Жанр</th>
+            <th>Длительность</th>
+            <th>Рейтинг IMDB</th>
+            <th>Возрастной рейтинг</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="movie : ${movies}">
+            <td th:text="${movie.title}"></td>
+            <td th:text="${movie.year}"></td>
+            <td th:text="${movie.director}"></td>
+            <td th:text="${movie.genreDisplay}"></td>
+            <td th:text="${movie.duration + ' мин.'}"></td>
+            <td th:text="${movie.imdbRating != null ? movie.imdbRating + '/10' : 'Нет оценки'}"></td>
+            <td th:text="${movie.ratingDisplay}"></td>
+            <td>
+                <div class="btn-group" role="group">
+                    <a th:href="@{/movies/edit/{id}(id=${movie.id})}"
+                       class="btn btn-warning btn-sm">Изменить</a>
+                    <form th:action="@{/movies/delete/{id}(id=${movie.id})}"
+                          method="post"
+                          style="display: inline;">
+                        <button type="submit"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Точно удаляем? 🎬')">
+                            Удалить
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
