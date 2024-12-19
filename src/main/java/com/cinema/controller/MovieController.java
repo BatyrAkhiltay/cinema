@@ -1,8 +1,11 @@
 package com.cinema.controller;
 
+import com.cinema.model.Genre;
 import com.cinema.model.Movie;
 import com.cinema.service.MovieService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +15,27 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MovieController {
     private final MovieService  movieService;
+    private static final int PAGE_SIZE = 5;
 
     @GetMapping
-    public String listMovies(Model model) {
-        model.addAttribute("movies", movieService.getAllMovies());
+    public String listMovies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) Genre genre,
+            @RequestParam(required = false) Double minRating,
+            Model model
+    ) {
+        Page<Movie> moviePage = movieService.getMovies(
+                genre,
+                minRating,
+                PageRequest.of(page, PAGE_SIZE)
+        );
+
+        model.addAttribute("movies", moviePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", moviePage.getTotalPages());
+        model.addAttribute("selectedGenre", genre);
+        model.addAttribute("selectedRating", minRating);
+
         return "movies/list";
     }
 

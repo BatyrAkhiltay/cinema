@@ -17,12 +17,14 @@
 </head>
 <body>
 <div class="container mt-5">
+    <!-- Заголовок -->
     <div class="row mb-4">
         <div class="col">
             <h1>Фильмы</h1>
         </div>
     </div>
 
+    <!-- Кнопки управления -->
     <div class="row mb-4">
         <div class="col d-flex justify-content-between align-items-center">
             <div sec:authorize="hasRole('ADMIN')">
@@ -38,6 +40,53 @@
         </div>
     </div>
 
+    <!-- Фильтры -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <form th:action="@{/movies}" method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="genre" class="form-label">Жанр</label>
+                            <select class="form-select" id="genre" name="genre">
+                                <option value="">Все жанры</option>
+                                <option th:each="genreOption : ${T(com.cinema.model.Genre).values()}"
+                                        th:value="${genreOption}"
+                                        th:text="${
+                                            genreOption == T(com.cinema.model.Genre).ACTION ? 'Боевик' :
+                                            genreOption == T(com.cinema.model.Genre).COMEDY ? 'Комедия' :
+                                            genreOption == T(com.cinema.model.Genre).DRAMA ? 'Драма' :
+                                            genreOption == T(com.cinema.model.Genre).HORROR ? 'Ужасы' :
+                                            genreOption == T(com.cinema.model.Genre).THRILLER ? 'Триллер' :
+                                            genreOption == T(com.cinema.model.Genre).SCIFI ? 'Научная фантастика' : ''}"
+                                        th:selected="${genreOption == selectedGenre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="minRating" class="form-label">Минимальный рейтинг IMDB</label>
+                            <select class="form-select" id="minRating" name="minRating">
+                                <option value="">Любой рейтинг</option>
+                                <option value="7" th:selected="${selectedRating == 7}">От 7 и выше</option>
+                                <option value="8" th:selected="${selectedRating == 8}">От 8 и выше</option>
+                                <option value="9" th:selected="${selectedRating == 9}">От 9 и выше</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="bi bi-funnel"></i> Применить фильтры
+                            </button>
+                            <a th:href="@{/movies}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Сбросить
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица с фильмами -->
     <div class="row">
         <div class="col">
             <div class="table-responsive">
@@ -103,6 +152,36 @@
             <div th:if="${#lists.isEmpty(movies)}" class="alert alert-info text-center">
                 <p class="mb-0">Фильмы пока не добавлены</p>
             </div>
+        </div>
+    </div>
+
+    <!-- Пагинация -->
+    <div class="row mt-4" th:if="${totalPages > 1}">
+        <div class="col">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                        <a class="page-link"
+                           th:href="@{/movies(page=${currentPage - 1}, genre=${selectedGenre}, minRating=${selectedRating})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${pageNum == currentPage ? 'active' : ''}">
+                        <a class="page-link"
+                           th:href="@{/movies(page=${pageNum}, genre=${selectedGenre}, minRating=${selectedRating})}"
+                           th:text="${pageNum + 1}"></a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                        <a class="page-link"
+                           th:href="@{/movies(page=${currentPage + 1}, genre=${selectedGenre}, minRating=${selectedRating})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>
